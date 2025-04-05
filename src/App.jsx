@@ -4,6 +4,8 @@ import Home from "./pages/Home.jsx";
 import Login from "./pages/Login.jsx";
 import Dashboard from "./pages/Dashboard.jsx";
 import Signup from "./pages/Signup.jsx"; // Import the Signup component
+import ForgotPassword from "./pages/ForgotPassword.jsx"; // Import ForgotPassword component
+import ResetPassword from "./pages/ResetPassword.jsx"; // Import ResetPassword component
 import './index.css'; // Ensure Tailwind's base styles are included
 
 function App() {
@@ -84,6 +86,8 @@ function App() {
                         <Route path="/" element={<Home />} />
                         <Route path="/login" element={isAuthenticated ? <Navigate to="/dashboard" replace /> : <Login onLoginSuccess={handleLoginSuccess} />} />
                         <Route path="/signup" element={<Signup />} /> {/* Add the signup route */}
+                        <Route path="/forgot-password" element={<ForgotPassword />} /> {/* Add the forgot password route */}
+                        <Route path="/reset-password/:token" element={<ResetPassword />} /> {/* Add the reset password route with token parameter */}
                         <Route path="/dashboard" element={isAuthenticated ? <Dashboard /> : <Navigate to="/login" replace />} />
                         {/* Optional: Add a catch-all route for debugging */}
                         {/* <Route path="*" element={<div>404 Not Found</div>} /> */}
