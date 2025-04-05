@@ -4,7 +4,7 @@ import { Link, useNavigate } from 'react-router-dom';
 function Login({ onLoginSuccess }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [rememberMe, setRememberMe] = useState(false); // State for the checkbox
+  const [rememberMe, setRememberMe] = useState(false);
   const [error, setError] = useState(null);
   const navigate = useNavigate();
 
@@ -25,11 +25,11 @@ function Login({ onLoginSuccess }) {
     setError(null);
 
     try {
-          const loginData = {
-            email: email,
-            password: password,
-            remember: rememberMe // Add this line here
-          };
+      const loginData = {
+        email: email,
+        password: password,
+        remember: rememberMe
+      };
 
       const response = await fetch("http://localhost:8080/auth/login", {
         method: "POST",
@@ -41,12 +41,20 @@ function Login({ onLoginSuccess }) {
 
       if (!response.ok) {
         let errorMessage = "Login Failed";
+        const contentType = response.headers.get("content-type");
+
         try {
-          const errorData = await response.json();
-          errorMessage = errorData.message || `Login Failed (Status: ${response.status})`;
-        } catch (jsonError) {
+          if (contentType && contentType.includes("application/json")) {
+            const errorData = await response.json();
+            errorMessage = errorData.message || `Login Failed (Status: ${response.status})`;
+          } else {
+            const textError = await response.text();
+            errorMessage = `Login Failed: ${textError || response.statusText}`;
+          }
+        } catch (parseError) {
           const textError = await response.text();
           errorMessage = `Login Failed: ${textError || response.statusText}`;
+          console.error("Error parsing error response:", parseError);
         }
         throw new Error(errorMessage);
       }
@@ -55,13 +63,11 @@ function Login({ onLoginSuccess }) {
 
       if (data.token) {
         localStorage.setItem("token", data.token);
-
         if (rememberMe) {
           localStorage.setItem('rememberedEmail', email);
         } else {
           localStorage.removeItem('rememberedEmail');
         }
-
         if (onLoginSuccess) {
           onLoginSuccess();
         }
@@ -113,6 +119,10 @@ function Login({ onLoginSuccess }) {
               <Link to="/forgot-password" className="font-medium text-indigo-600 hover:text-indigo-500">Forgot your password?</Link>
             </div>
           </div>
+
+          {error && (
+            <div className="text-red-500 mt-2">{error}</div>
+          )}
 
           <div>
             <button type="submit" className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
